@@ -8,12 +8,14 @@ async function bootstrap() {
 
   const config = new DocumentBuilder()
     .setTitle('SSH TRANSPORTS API')
-    .setDescription('The SSH TRANSPORTS API is used to provides the backend for the SSH TRANSPORTS applications')
+    .setDescription(
+      'The SSH TRANSPORTS API is used to provides the backend for the SSH TRANSPORTS applications',
+    )
     .setVersion('1.0')
     .build();
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, document);
-  
+
   app.useGlobalPipes(new ValidationPipe());
 
   await app.listen(3000);
