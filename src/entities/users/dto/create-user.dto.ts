@@ -1,15 +1,23 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Role } from '@prisma/client';
-import { IsEmail, IsEnum, IsStrongPassword } from 'class-validator';
+import { IsEmail, IsEnum, IsString, IsStrongPassword } from 'class-validator';
 
 export class CreateUserDto {
+  @ApiProperty({
+    description: 'O nome do usuário',
+    example: 'Teste',
+    required: true,
+  })
+  @IsString({ message: 'O nome deve ser uma string' })
+  name: string;
+
   @ApiProperty({
     description: 'E-mail do usuário',
     example: 'teste@gmail.com',
     required: true,
   })
   @IsEmail({}, { message: 'Insira um e-mail válido' })
-  email;
+  email: string;
 
   @ApiProperty({
     description: 'A senha do usuário',
@@ -29,7 +37,7 @@ export class CreateUserDto {
         'A senha deve conter no mínimo 8 caracteres, 1 letra minúscula, 1 letra maiúscula, 1 número e 1 caractere especial',
     },
   )
-  password;
+  password: string;
 
   @ApiProperty({
     description: 'O cargo do usuário',
@@ -37,5 +45,5 @@ export class CreateUserDto {
     required: true,
   })
   @IsEnum(Role)
-  role;
+  role: Role;
 }
