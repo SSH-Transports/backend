@@ -35,7 +35,7 @@ export class OrdersController {
 
   @HttpCode(HttpStatus.OK)
   @Get(':id')
-  async findOne(@Body() id: string) {
+  async findOne(@Param("id") id: string) {
     return this.ordersService.findOne(id);
   }
 
