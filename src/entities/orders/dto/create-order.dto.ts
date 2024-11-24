@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNumber } from 'class-validator';
+import { OrderStatus } from '@prisma/client';
+import { IsEnum, IsNumber, IsUUID } from 'class-validator';
 
 export class CreateOrderDto {
   @ApiProperty({
@@ -43,4 +44,19 @@ export class CreateOrderDto {
   })
   @IsNumber({}, { message: 'A longitude deve ser um número' })
   longitude: number;
+
+  @ApiProperty({
+    description: 'O status do pedido',
+    enum: OrderStatus,
+    required: true,
+  })
+  @IsEnum(OrderStatus, { message: 'Status inválido' })
+  status: OrderStatus;
+
+  @ApiProperty({
+    description: 'Id do cliente',
+    required: true,
+  })
+  @IsUUID('4', { message: 'Id do cliente inválido' })
+  customerId: string;
 }
