@@ -9,29 +9,46 @@ datasource db {
 
 enum Role {
   ADMIN
-  EMPLOYEE
   COURIER
   CUSTOMER
 }
 
 model User {
-  id        String   @id @default(uuid())
-  name      String
-  email     String   @unique
-  password  String
-  role      Role
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id             String   @id @default(uuid())
+  name           String
+  email          String   @unique
+  password       String
+  role           Role
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  courierOrders  Order[]  @relation("CourierOrders")
+  customerOrders Order[]  @relation("CustomerOrders")
+  adminOrders    Order[]  @relation("AdminOrders")
+}
+
+enum OrderStatus {
+  WAITING_RESPONSE
+  SEPARATING
+  ON_THE_WAY
+  DELIVERED
+  REFUSED
 }
 
 model Order {
-  id        String      @id @default(uuid())
-  latitude  Float
-  longitude Float
-  time      String
-  weight    String
-  cost      Float
-  distance  String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id         String      @id @default(uuid())
+  latitude   Float
+  longitude  Float
+  time       String
+  weight     String
+  cost       Float
+  distance   String
+  status     OrderStatus
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+  courierId  String?
+  courier    User?       @relation("CourierOrders", fields: [courierId], references: [id])
+  customerId String?
+  customer   User?       @relation("CustomerOrders", fields: [customerId], references: [id])
+  adminId    String?
+  admin      User?       @relation("AdminOrders", fields: [adminId], references: [id])
 }
