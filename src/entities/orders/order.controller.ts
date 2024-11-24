@@ -1,7 +1,14 @@
-import { Body, Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Post,
+} from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
-import { OrdersService } from './orders.service';
 import { CreateOrderDto } from './dto/create-order.dto';
+import { OrdersService } from './orders.service';
 
 @ApiTags('Orders')
 @Controller('orders')
@@ -12,5 +19,17 @@ export class OrdersController {
   @Post()
   async create(@Body() createOrderDto: CreateOrderDto) {
     return this.ordersService.create(createOrderDto);
+  }
+
+  @HttpCode(HttpStatus.OK)
+  @Get()
+  async findAll() {
+    return this.ordersService.findAll();
+  }
+
+  @HttpCode(HttpStatus.OK)
+  @Get(':id')
+  async findOne(@Body() id: string) {
+    return this.ordersService.findOne(id);
   }
 }
