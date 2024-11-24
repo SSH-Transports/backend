@@ -1,9 +1,10 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { OrderStatus } from '@prisma/client';
 import dayjs from 'dayjs';
+import { NotificationsGateway } from 'src/websockets/use-cases/notifications.gateway';
 import { PrismaService } from '../../connections/prisma/prisma.service';
 import { CreateOrderDto } from './dto/create-order.dto';
-import { NotificationsGateway } from 'src/websockets/use-cases/notifications.gateway';
+import { UpdateOrderDto } from './dto/update-order.dto';
 
 @Injectable()
 export class OrdersService {
@@ -36,14 +37,14 @@ export class OrdersService {
     });
   }
 
-  async updateStatus(id: string, status: OrderStatus) {
+  async update(id: string, data: UpdateOrderDto) {
     const oldOrder = await this.prismaService.order.findUnique({ where: { id } });
 
-    if(!oldOrder) {
+    if (!oldOrder) {
       throw new NotFoundException('Order not found');
     }
 
-    if(oldOrder.status === status) {
+    if (oldOrder.status === data.status) {
       throw new BadRequestException('Order already has this status');
     }
 
@@ -53,7 +54,7 @@ export class OrdersService {
 
     return this.prismaService.order.update({
       where: { id },
-      data: { status },
+      data,
     });
   }
 

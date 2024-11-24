@@ -5,14 +5,16 @@ import {
   Get,
   HttpCode,
   HttpStatus,
+  Param,
+  Patch,
   Post,
-  Query,
+  Query
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { OrderStatus } from '@prisma/client';
 import { CreateOrderDto } from './dto/create-order.dto';
+import { UpdateOrderDto } from './dto/update-order.dto';
 import { OrdersService } from './orders.service';
-import { stat } from 'fs';
 
 @ApiTags('Orders')
 @Controller('orders')
@@ -41,6 +43,11 @@ export class OrdersController {
   @Get('user/:userId')
   async findByUserId(@Body() userId: string) {
     return this.ordersService.findByUserId(userId);
+  }
+
+  @Patch(':id')
+  update(@Param('id') id: string, @Body() updateUserDto: UpdateOrderDto) {
+    return this.ordersService.update(id, updateUserDto);
   }
 
   @HttpCode(HttpStatus.OK)
