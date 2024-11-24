@@ -1,13 +1,20 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { PrismaService } from '../../connections/prisma/prisma.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 
 @Injectable()
 export class UsersService {
-  constructor(private readonly prismaService: PrismaService) {}
+  constructor(private readonly prismaService: PrismaService) { }
 
-  create(data: CreateUserDto) {
+  async create(data: CreateUserDto) {
+    const user = await this.findByEmail(data.email);
+
+    if (user) {
+      throw new BadRequestException('Usuário já cadastrado');
+
+    }
+
     return this.prismaService.user.create({ data });
   }
 
