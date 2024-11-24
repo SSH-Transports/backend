@@ -1,12 +1,16 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { OrderStatus } from '@prisma/client';
 import dayjs from 'dayjs';
 import { PrismaService } from '../../connections/prisma/prisma.service';
 import { CreateOrderDto } from './dto/create-order.dto';
+import { NotificationsGateway } from 'src/websockets/use-cases/notifications.gateway';
 
 @Injectable()
 export class OrdersService {
-  constructor(private readonly prismaService: PrismaService) { }
+  constructor(
+    private readonly prismaService: PrismaService,
+    private readonly notificationsGateway: NotificationsGateway,
+  ) {}
 
   create(data: CreateOrderDto) {
     return this.prismaService.order.create({ data });
@@ -29,6 +33,27 @@ export class OrdersService {
           { customerId: userId },
         ],
       },
+    });
+  }
+
+  async updateStatus(id: string, status: OrderStatus) {
+    const oldOrder = await this.prismaService.order.findUnique({ where: { id } });
+
+    if(!oldOrder) {
+      throw new NotFoundException('Order not found');
+    }
+
+    if(oldOrder.status === status) {
+      throw new BadRequestException('Order already has this status');
+    }
+
+    this.notificationsGateway.notifyUser(oldOrder.adminId, `Order ${id} status updated to ${status}`);
+    this.notificationsGateway.notifyUser(oldOrder.customerId, `Order ${id} status updated to ${status}`);
+    this.notificationsGateway.notifyUser(oldOrder.courierId, `Order ${id} status updated to ${status}`);
+
+    return this.prismaService.order.update({
+      where: { id },
+      data: { status },
     });
   }
 
