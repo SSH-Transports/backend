@@ -1,5 +1,5 @@
-import { IsEmail, IsStrongPassword } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+import { IsEmail, IsString } from 'class-validator';
 
 export class LoginUserDto {
   @ApiProperty({
@@ -8,25 +8,13 @@ export class LoginUserDto {
     required: true,
   })
   @IsEmail({}, { message: 'Insira um e-mail válido' })
-  email;
+  email: string;
 
   @ApiProperty({
     description: 'A senha do usuário',
     example: 'Teste@123',
     required: true,
   })
-  @IsStrongPassword(
-    {
-      minLength: 8,
-      minLowercase: 1,
-      minUppercase: 1,
-      minNumbers: 1,
-      minSymbols: 1,
-    },
-    {
-      message:
-        'A senha deve conter no mínimo 8 caracteres, 1 letra minúscula, 1 letra maiúscula, 1 número e 1 caractere especial',
-    },
-  )
-  password;
+  @IsString({ message: 'A senha deve ser uma string' })
+  password: string;
 }
