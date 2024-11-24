@@ -45,9 +45,9 @@ export class OrdersService {
     }
 
     if (oldOrder.status !== data.status) {
-      this.notificationsGateway.notifyUser(oldOrder.adminId, `Order ${id} status updated to ${status}`);
-      this.notificationsGateway.notifyUser(oldOrder.customerId, `Order ${id} status updated to ${status}`);
-      this.notificationsGateway.notifyUser(oldOrder.courierId, `Order ${id} status updated to ${status}`);
+      this.notificationsGateway.notifyUser(oldOrder.adminId, `Order ${id} status updated to ${data.status}`);
+      this.notificationsGateway.notifyUser(oldOrder.customerId, `Order ${id} status updated to ${data.status}`);
+      this.notificationsGateway.notifyUser(oldOrder.courierId, `Order ${id} status updated to ${data.status}`);
     }
 
 
