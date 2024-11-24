@@ -11,7 +11,7 @@ export class OrdersService {
   constructor(
     private readonly prismaService: PrismaService,
     private readonly notificationsGateway: NotificationsGateway,
-  ) {}
+  ) { }
 
   create(data: CreateOrderDto) {
     return this.prismaService.order.create({ data });
@@ -44,13 +44,12 @@ export class OrdersService {
       throw new NotFoundException('Order not found');
     }
 
-    if (oldOrder.status === data.status) {
-      throw new BadRequestException('Order already has this status');
+    if (oldOrder.status !== data.status) {
+      this.notificationsGateway.notifyUser(oldOrder.adminId, `Order ${id} status updated to ${status}`);
+      this.notificationsGateway.notifyUser(oldOrder.customerId, `Order ${id} status updated to ${status}`);
+      this.notificationsGateway.notifyUser(oldOrder.courierId, `Order ${id} status updated to ${status}`);
     }
 
-    this.notificationsGateway.notifyUser(oldOrder.adminId, `Order ${id} status updated to ${status}`);
-    this.notificationsGateway.notifyUser(oldOrder.customerId, `Order ${id} status updated to ${status}`);
-    this.notificationsGateway.notifyUser(oldOrder.courierId, `Order ${id} status updated to ${status}`);
 
     return this.prismaService.order.update({
       where: { id },
