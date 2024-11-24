@@ -33,6 +33,7 @@ export class CreateOrderDto {
     description: 'Custo do pedido',
     required: true,
   })
+  @IsNumber({}, { message: 'O custo do pedido deve ser um numero' })
   cost: number;
 
   @ApiProperty({
