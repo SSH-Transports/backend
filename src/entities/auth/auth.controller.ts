@@ -12,7 +12,7 @@ export class AuthController {
   @Public()
   @HttpCode(HttpStatus.OK)
   @Post('login')
-  signIn(@Body() { email, password }: LoginUserDto) {
-    return this.authService.signIn(email, password);
+  signIn(@Body() { email, password, isFromMobile }: LoginUserDto) {
+    return this.authService.signIn(email, password, isFromMobile);
   }
 }
