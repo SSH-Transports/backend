@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEmail, IsString } from 'class-validator';
+import { IsBoolean, IsEmail, IsString } from 'class-validator';
 
 export class LoginUserDto {
   @ApiProperty({
@@ -17,4 +17,12 @@ export class LoginUserDto {
   })
   @IsString({ message: 'A senha deve ser uma string' })
   password: string;
+
+  @ApiProperty({
+    description: 'Propriedade que define se está vindo do web ou mobile',
+    example: false,
+    required: true,
+  })
+  @IsBoolean({ message: 'A propriedade isFromMobile deve ser um booleano' })
+  isFromMobile: boolean;
 }
