@@ -41,7 +41,7 @@ export class OrdersController {
 
   @HttpCode(HttpStatus.OK)
   @Get('user/:userId')
-  async findByUserId(@Body() userId: string) {
+  async findByUserId(@Param("userId") userId: string) {
     return this.ordersService.findByUserId(userId);
   }
 

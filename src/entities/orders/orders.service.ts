@@ -26,7 +26,7 @@ export class OrdersService {
   }
 
   findByUserId(userId: string) {
-    return this.prismaService.order.findFirst({
+    return this.prismaService.order.findMany({
       where: {
         OR: [
           { adminId: userId },
