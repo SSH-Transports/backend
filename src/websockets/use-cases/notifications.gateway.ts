@@ -1,48 +1,87 @@
-import { OnGatewayConnection, OnGatewayDisconnect, SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
+import { NotFoundException } from '@nestjs/common';
+import { MessageBody, OnGatewayConnection, OnGatewayDisconnect, SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
+import { NotificationStatus, NotificationType, OrderStatus } from '@prisma/client';
 import { Server, Socket } from 'socket.io';
+import { PrismaService } from 'src/connections/prisma/prisma.service';
 
 @WebSocketGateway({
-  cors: {
-    origin: '*',
-  },
+  cors: { origin: '*' },
 })
 export class NotificationsGateway implements OnGatewayConnection, OnGatewayDisconnect {
+  constructor(
+    private readonly prismaService: PrismaService,
+  ) { }
+
   @WebSocketServer()
   server: Server;
 
-  private clients = new Map<string, Socket>();
-
   handleConnection(client: Socket) {
-    const userId = client.handshake.query.userId as string;
-    if (userId) {
-      this.clients.set(userId, client);
-      console.log(`User ${userId} connected`);
-    }
+    console.log(`Cliente conectado: ${client.id}`);
   }
 
   handleDisconnect(client: Socket) {
-    const userId = Array.from(this.clients.entries())
-      .find(([, socket]) => socket.id === client.id)?.[0];
-    if (userId) {
-      this.clients.delete(userId);
-      console.log(`User ${userId} disconnected`);
-    }
+    console.log(`Cliente desconectado: ${client.id}`);
   }
 
-  notifyUser(userId: string, message: string) {
-    const client = this.clients.get(userId);
-    if (client) {
-      console.log(`User ${userId} notified`);
-      console.log(`Message: ${message}`);
-      client.emit('delivery-notification', message);
-    } else {
-      console.log(`User ${userId} not connected`);
+  @SubscribeMessage('sendNotification')
+  async handleNotifyUser(
+    @MessageBody() data: {
+      userId: string;
+      title: string;
+      message: string;
+      type: NotificationType;
+      orderId: string;
+      orderStatus: OrderStatus;
+      link?: string;
     }
+  ): Promise<void> {
+    const order = await this.prismaService.order.findUnique({
+      where: { id: data.orderId }
+    })
+
+    if (!order) {
+      throw new NotFoundException('Order not found');
+    }
+
+    const { courierId, customerId } = order;
+
+    if (data.type === NotificationType.ORDER) {
+      await Promise.all(
+        [courierId, customerId].map(
+          async (userId) => {
+            if (!userId) return;
+
+            await this.prismaService.notification.create({
+              data: {
+                type: data.type,
+                link: data.link,
+                title: data.title,
+                message: data.message,
+                status: NotificationStatus.UNREAD,
+                userId,
+              }
+            });
+
+            this.server.emit('notification', data);
+          })
+      )
+    }
+
+    await this.prismaService.order.update({
+      where: { id: data.orderId },
+      data: { status: data.orderStatus }
+    });
+
+    this.server.emit('notification', data);
   }
 
-  notifyAll(message: string) {
-    console.log('Notifying all users');
-    console.log(`Message: ${message}`);
-    this.server.emit('delivery-notification', message);
+  @SubscribeMessage('markAsRead')
+  async handleMarkAsRead(
+    @MessageBody() ids: string[]
+  ): Promise<void> {
+    await this.prismaService.notification.updateMany({
+      where: { id: { in: ids } },
+      data: { status: NotificationStatus.READ }
+    });
   }
 }

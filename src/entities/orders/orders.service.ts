@@ -44,12 +44,6 @@ export class OrdersService {
       throw new NotFoundException('Order not found');
     }
 
-    if (oldOrder.status !== data.status) {
-      this.notificationsGateway.notifyUser(oldOrder.adminId, `Order ${id} status updated to ${data.status}`);
-      this.notificationsGateway.notifyUser(oldOrder.customerId, `Order ${id} status updated to ${data.status}`);
-      this.notificationsGateway.notifyUser(oldOrder.courierId, `Order ${id} status updated to ${data.status}`);
-    }
-
 
     return this.prismaService.order.update({
       where: { id },

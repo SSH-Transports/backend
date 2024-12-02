@@ -2,6 +2,7 @@ import { BadRequestException, Injectable, NotFoundException } from '@nestjs/comm
 import { PrismaService } from '../../connections/prisma/prisma.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { Role } from '@prisma/client';
 
 @Injectable()
 export class UsersService {
@@ -47,5 +48,11 @@ export class UsersService {
 
   remove(id: string) {
     return this.prismaService.user.delete({ where: { id } });
+  }
+
+  async findUsersByRole(role: Role) {
+    return this.prismaService.user.findMany({
+      where: { role },
+    });
   }
 }

@@ -14,16 +14,17 @@ enum Role {
 }
 
 model User {
-  id             String   @id @default(uuid())
+  id             String         @id @default(uuid())
   name           String
-  email          String   @unique
+  email          String         @unique
   password       String
   role           Role
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
-  courierOrders  Order[]  @relation("CourierOrders")
-  customerOrders Order[]  @relation("CustomerOrders")
-  adminOrders    Order[]  @relation("AdminOrders")
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+  courierOrders  Order[]        @relation("CourierOrders")
+  customerOrders Order[]        @relation("CustomerOrders")
+  adminOrders    Order[]        @relation("AdminOrders")
+  Notification   Notification[]
 }
 
 enum OrderStatus {
@@ -51,4 +52,27 @@ model Order {
   customer   User?       @relation("CustomerOrders", fields: [customerId], references: [id])
   adminId    String?
   admin      User?       @relation("AdminOrders", fields: [adminId], references: [id])
+}
+
+enum NotificationStatus {
+  READ
+  UNREAD
+}
+
+enum NotificationType {
+  ORDER
+  MESSAGE
+}
+
+model Notification {
+  id        String             @id @default(uuid())
+  title     String
+  message   String
+  status    NotificationStatus
+  type      NotificationType
+  link      String?
+  createdAt DateTime           @default(now())
+  updatedAt DateTime           @updatedAt
+  userId    String
+  user      User               @relation(fields: [userId], references: [id])
 }

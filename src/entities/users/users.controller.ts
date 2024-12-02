@@ -6,12 +6,14 @@ import {
   Param,
   Patch,
   Post,
+  Query,
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { Public } from '../auth/public.decorator';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UsersService } from './users.service';
+import { Role } from '@prisma/client';
 
 @ApiTags('Users')
 @Controller('users')
@@ -25,7 +27,10 @@ export class UsersController {
   }
 
   @Get()
-  findAll() {
+  findAll(@Query('role') role: Role) {
+    if (role) {
+      return this.usersService.findUsersByRole(role);
+    }
     return this.usersService.findAll();
   }
 
